@@ -41,6 +41,7 @@ _vehicleTrigger setTriggerStatements [
     ""
 ];
 _vehicleGroupLeader synchronizeObjectsAdd [_vehicleTrigger];
+[_vehicleGroupLeader, false, "once", 1, 1, "params[""_unit""]; [""TimberCorpReinforcements_spawned"", [_unit]] call CBA_fnc_serverEvent"] execVM "murk\murk_spawn.sqf";
 
 //Create infantry trigger for murk
 private _infantryTrigger = createTrigger ["EmptyDetector", getPos _infantryLeader];
@@ -52,9 +53,7 @@ _infantryTrigger setTriggerStatements [
     ""
 ];
 _infantryLeader synchronizeObjectsAdd [_infantryTrigger];
-
-[_vehicleGroupLeader, false, "once"] execVM "murk\murk_spawn.sqf";
-[_infantryLeader, false, "once"] execVM "murk\murk_spawn.sqf";
+[_infantryLeader, false, "once", 1, 1, "params[""_unit""]; [""TimberCorpReinforcements_spawned"", [_unit]] call CBA_fnc_serverEvent"] execVM "murk\murk_spawn.sqf";
 
 private _reinforcement = createHashMap;
 
@@ -103,22 +102,24 @@ if (isNil "_TimberCorpReinforcements_callReinforcementEventId") then {
     }] call CBA_fnc_addEventHandler;
 
     //Look for spawned murk units
-    ["mc_murk_spawned", {
-        params ["_unitGroup"];
+    ["TimberCorpReinforcements_spawned", {
+        params ["_spawnedUnit"];
+
+        private _unitGroup = group _spawnedUnit;
         private _unit = nil;
         private _name = nil;
         private _reinforcementsMurkUnits = missionNamespace getVariable ["TimberCorpReinforcements_reinforcementsMurkUnits", []];
 
         //Detect if murk spawn one of reinforcement infantry group
         if (vehicleVarName leader _unitGroup in _reinforcementsMurkUnits) then {
-            _unit = leader _unitGroup;
-            _name = vehicleVarName leader _unitGroup;
+           _unit = leader _unitGroup;
+           _name = vehicleVarName leader _unitGroup;
         };
 
         //Detect if murk spawn one of reinforcement vehicle group
         if (vehicleVarName vehicle leader _unitGroup in _reinforcementsMurkUnits) then {
-            _unit = vehicle leader _unitGroup;
-            _name = vehicleVarName vehicle leader _unitGroup;
+           _unit = vehicle leader _unitGroup;
+           _name = vehicleVarName vehicle leader _unitGroup;
         };
 
         if (!isNil "_unit" && !isNil "_name") then {
@@ -128,8 +129,8 @@ if (isNil "_TimberCorpReinforcements_callReinforcementEventId") then {
 
             //Prevent a plane to fall directly from the sky
             if (vehicle _unit isKindOf "Plane" && (getPos _unit select 2) > 10) then {
-                vehicle _unit engineOn true;
-                vehicle _unit setVelocity [50 * (sin (getDir vehicle _unit)), 50 * (cos (getDir vehicle _unit)), 40];
+               vehicle _unit engineOn true;
+               vehicle _unit setVelocity [50 * (sin (getDir vehicle _unit)), 50 * (cos (getDir vehicle _unit)), 40];
             };
 
             //Add a variable to detected the group is spawned
@@ -138,7 +139,7 @@ if (isNil "_TimberCorpReinforcements_callReinforcementEventId") then {
             _reinforcementsMurkUnits deleteAt (_reinforcementsMurkUnits find _name);
         };
 
-   }] call CBA_fnc_addEventHandler;
+    }] call CBA_fnc_addEventHandler;
 
     //flag to prevent to init events handlers multiple times
     missionNamespace setVariable ["TimberCorpReinforcements_callReinforcementEventId", _TimberCorpReinforcements_callReinforcementEventId];
