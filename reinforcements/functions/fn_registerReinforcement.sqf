@@ -18,7 +18,7 @@ scriptName "TimberCorpReinforcements\registerReinforcement";
 
 if (!isServer) exitWith {};
 
-params ["_name", "_vehicle", "_infantryLeader", ["_insertionMethod", 1], ["_teleportUnits", false]];
+params ["_name", "_vehicle", "_infantryLeader", ["_insertionMethod", 1], ["_teleportUnits", false], ["_cacheSystem", "murk"]];
 
 private _reinforcements = missionNamespace getVariable ["TimberCorpReinforcements_reinforcements", createHashMap];
 
@@ -31,17 +31,28 @@ missionNamespace setVariable ["TimberCorpReinforcements_reinforcementsMurkUnits"
 private _vehicleGroup = group driver _vehicle;
 private _vehicleGroupLeader = leader _vehicle;
 
+private _triggerActivation = "";
+if (_cacheSystem == "murk") then {
+    _triggerActivation = "thisTrigger setVariable ['murk_spawn', true, true];"
+};
+
 //Create vehicle trigger for murk
 private _vehicleTrigger = createTrigger ["EmptyDetector", getPos _vehicle];
 _vehicleTrigger setTriggerType "NONE";
 _vehicleTrigger setTriggerActivation ["NONE", "NONE", false];
 _vehicleTrigger setTriggerStatements [
     "missionNamespace getVariable ['TimberCorpReinforcements_reinforcement_"+_name+"_spawn', false];",
-    "thisTrigger setVariable ['murk_spawn', true, true];",
+    _triggerActivation,
     ""
 ];
 _vehicleGroupLeader synchronizeObjectsAdd [_vehicleTrigger];
-[_vehicleGroupLeader, false, "once", 1, 1, "params[""_unit""]; [""TimberCorpReinforcements_spawned"", [_unit]] call CBA_fnc_serverEvent"] execVM "murk\murk_spawn.sqf";
+if (_cacheSystem == "murk") then {
+    [_vehicleGroupLeader, false, "once", 1, 1, "params[""_unit""]; [""TimberCorpReinforcements_spawned"", [_unit]] call CBA_fnc_serverEvent"] execVM "murk\murk_spawn.sqf";
+};
+
+if (_cacheSystem == "jebus") then {
+    [_vehicleGroupLeader, "INIT=", "[""TimberCorpReinforcements_spawned"", [_proxyThis]] call CBA_fnc_serverEvent"] spawn jebus_fnc_main;
+};
 
 //Create infantry trigger for murk
 private _infantryTrigger = createTrigger ["EmptyDetector", getPos _infantryLeader];
@@ -49,11 +60,16 @@ _infantryTrigger setTriggerType "NONE";
 _infantryTrigger setTriggerActivation ["NONE", "NONE", false];
 _infantryTrigger setTriggerStatements [
     "missionNamespace getVariable ['TimberCorpReinforcements_reinforcement_"+_name+"_spawn', false];",
-    "thisTrigger setVariable ['murk_spawn', true, true];",
+    _triggerActivation,
     ""
 ];
 _infantryLeader synchronizeObjectsAdd [_infantryTrigger];
-[_infantryLeader, false, "once", 1, 1, "params[""_unit""]; [""TimberCorpReinforcements_spawned"", [_unit]] call CBA_fnc_serverEvent"] execVM "murk\murk_spawn.sqf";
+if (_cacheSystem == "murk") then {
+    [_infantryLeader, false, "once", 1, 1, "params[""_unit""]; [""TimberCorpReinforcements_spawned"", [_unit]] call CBA_fnc_serverEvent"] execVM "murk\murk_spawn.sqf";
+};
+if (_cacheSystem == "jebus") then {
+    [_infantryLeader, "INIT=", "[""TimberCorpReinforcements_spawned"", [_proxyThis]] call CBA_fnc_serverEvent"] spawn jebus_fnc_main;
+};
 
 private _reinforcement = createHashMap;
 
