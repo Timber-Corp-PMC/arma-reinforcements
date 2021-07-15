@@ -112,9 +112,8 @@ if (isNil "_TimberCorpReinforcements_callReinforcementEventId") then {
 
     //Look for spawned murk units
     ["mc_murk_spawned", {
-        params ["_spawnedUnit"];
+        params ["_unitGroup"];
 
-        private _unitGroup = group _spawnedUnit;
         private _unit = nil;
         private _name = nil;
         private _reinforcementsMurkUnits = missionNamespace getVariable ["TimberCorpReinforcements_reinforcementsMurkUnits", []];
