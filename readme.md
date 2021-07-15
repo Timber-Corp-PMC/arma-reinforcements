@@ -1,13 +1,14 @@
 # Timber Corp Reinforcements
 
-Help you setup your reinforcements (QRF) for calling them later. Automatic usage of cache system for performances.
+Help you set up your reinforcements (QRF) for calling them later. Automatic usage of Murk for performances.
 
+Internally it uses ZEN fast rope and para drop scripts. _WARNING Para drop is not accurate._
 # Dependencies
 
 - [CBA](https://github.com/CBATeam/CBA_A3)
 - [ACE](https://github.com/acemod/ACE3)
 - [ZEN](https://github.com/zen-mod/ZEN)
-- [MC framework](https://www.misfit-company.com/arma3/mission_making/framework/) >=v0.3.4 
+- [MC framework](https://www.misfit-company.com/arma3/mission_making/framework/) (for Murk) >=v0.3.4
 
 # Usage
 
@@ -20,7 +21,7 @@ For this example we will add 3 reinforcement groups.
 ## Setup
 
 You will need to have a named **vehicle**, a named infantry group **leader** and a named waypoint for each of your reinforcement.
-You can put and setup as many waypoints as you would do normally.
+You can put as many waypoints as you would do normally. Murk remembers waypoint behaviour, combat mode, formation etc ...
 
 **Put your infantry group waypoints as they were starting at the [landing zone waypoint](#landing-zone-waypoint)**.
 
@@ -30,7 +31,7 @@ You can put and setup as many waypoints as you would do normally.
 
 ### Our plane group
 
-**Be mindful the plane will start engine off, so don't forget to place it high in the sky.**
+**Be mindful some planes will start engine off, so don't forget to place it high in the sky if needed.**
 
 ![QRF](docs/setup/qrf2.png)
 
