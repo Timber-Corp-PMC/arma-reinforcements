@@ -1,24 +1,33 @@
-//    author: Geelik
-//    description:
-//        Help you setup your reinforcements (QRF) for calling them later.
-//        Automatic usage of murk for performance
-//    parameters:
-//        _name: name of your reinforcement. This is used for calling the reinforcement
-//        _vehicle: Variable name of the vehicle used
-//        _infantryLeader: Variable name of the infantry group leader that will be deployed
-//        _insertionMethod: 1 = land, 2 = fast rope (ace fast rope need to be enabled if not default to land), 3 = parachute
-//        _teleportUnits:
-//            if true teleport directly the infantry inside the vehicle (suggested for planes)
-//            if false waypoints will be created to let infantry mount inside the vehicle
-//        _vehicleInitScript: init script as a string used by murk for the vehicle
-//        _infantryInitScript: init script as a string used by murk for the infantry
-//    return: nothing
+/*
+    author: Geelik
+    description:
+        Help you setup your reinforcements (QRF) for calling them later.
+        Automatic usage of murk for performance
+    parameters:
+        _name: name of your reinforcement. This is used for calling the reinforcement
+        _vehicle: Variable name of the vehicle used
+        _infantryLeader: Variable name of the infantry group leader that will be deployed
+        _options :
+            insertionMethod: (default 1)
+                1 = land
+                2 = fast rope (ace fast rope need to be enabled if not default to land)
+                3 = parachute
+            teleportUnits: (default false)
+                if true teleport directly the infantry inside the vehicle (suggested for planes)
+                if false waypoints will be created to let infantry mount inside the vehicle
+    return: nothing
+*/
 
 scriptName "TimberCorpReinforcements\registerReinforcement";
 
 if (!isServer) exitWith {};
 
-params ["_name", "_vehicle", "_infantryLeader", ["_insertionMethod", 1], ["_teleportUnits", false], ["_cacheSystem", "murk"]];
+params ["_name", "_vehicle", "_infantryLeader", ["_options", []]];
+
+_options = createHashMapFromArray _options;
+
+private _insertionMethod = _options getOrDefault ["insertionMethod", 1];
+private _teleportUnits = _options getOrDefault ["teleportUnits", false];
 
 private _reinforcements = missionNamespace getVariable ["TimberCorpReinforcements_reinforcements", createHashMap];
 
@@ -31,28 +40,17 @@ missionNamespace setVariable ["TimberCorpReinforcements_reinforcementsMurkUnits"
 private _vehicleGroup = group driver _vehicle;
 private _vehicleGroupLeader = leader _vehicle;
 
-private _triggerActivation = "";
-if (_cacheSystem == "murk") then {
-    _triggerActivation = "thisTrigger setVariable ['murk_spawn', true, true];"
-};
-
 //Create vehicle trigger for murk
 private _vehicleTrigger = createTrigger ["EmptyDetector", getPos _vehicle];
 _vehicleTrigger setTriggerType "NONE";
 _vehicleTrigger setTriggerActivation ["NONE", "NONE", false];
 _vehicleTrigger setTriggerStatements [
     "missionNamespace getVariable ['TimberCorpReinforcements_reinforcement_"+_name+"_spawn', false];",
-    _triggerActivation,
+    "thisTrigger setVariable ['murk_spawn', true, true];",
     ""
 ];
 _vehicleGroupLeader synchronizeObjectsAdd [_vehicleTrigger];
-if (_cacheSystem == "murk") then {
-    [_vehicleGroupLeader, false, "once", 1, 1, "params[""_unit""]; [""TimberCorpReinforcements_spawned"", [_unit]] call CBA_fnc_serverEvent"] execVM "murk\murk_spawn.sqf";
-};
-
-if (_cacheSystem == "jebus") then {
-    [_vehicleGroupLeader, "INIT=", "[""TimberCorpReinforcements_spawned"", [_proxyThis]] call CBA_fnc_serverEvent"] spawn jebus_fnc_main;
-};
+[_vehicleGroupLeader, false, "once"] execVM "murk\murk_spawn.sqf";
 
 //Create infantry trigger for murk
 private _infantryTrigger = createTrigger ["EmptyDetector", getPos _infantryLeader];
@@ -60,16 +58,11 @@ _infantryTrigger setTriggerType "NONE";
 _infantryTrigger setTriggerActivation ["NONE", "NONE", false];
 _infantryTrigger setTriggerStatements [
     "missionNamespace getVariable ['TimberCorpReinforcements_reinforcement_"+_name+"_spawn', false];",
-    _triggerActivation,
+    "thisTrigger setVariable ['murk_spawn', true, true];",
     ""
 ];
 _infantryLeader synchronizeObjectsAdd [_infantryTrigger];
-if (_cacheSystem == "murk") then {
-    [_infantryLeader, false, "once", 1, 1, "params[""_unit""]; [""TimberCorpReinforcements_spawned"", [_unit]] call CBA_fnc_serverEvent"] execVM "murk\murk_spawn.sqf";
-};
-if (_cacheSystem == "jebus") then {
-    [_infantryLeader, "INIT=", "[""TimberCorpReinforcements_spawned"", [_proxyThis]] call CBA_fnc_serverEvent"] spawn jebus_fnc_main;
-};
+[_infantryLeader, false, "once"] execVM "murk\murk_spawn.sqf";
 
 private _reinforcement = createHashMap;
 
@@ -118,7 +111,7 @@ if (isNil "_TimberCorpReinforcements_callReinforcementEventId") then {
     }] call CBA_fnc_addEventHandler;
 
     //Look for spawned murk units
-    ["TimberCorpReinforcements_spawned", {
+    ["mc_murk_spawned", {
         params ["_spawnedUnit"];
 
         private _unitGroup = group _spawnedUnit;
