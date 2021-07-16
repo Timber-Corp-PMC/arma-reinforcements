@@ -25,6 +25,10 @@ class CfgFunctions {
 };
 ```
 
+# Demo mission
+
+The provided demo mission should be played with the [MC event modpack](https://www.misfit-company.com/arma3/swifty/swifty3/#adding-the-modpacks).
+
 # Usage
 
 For this example we will add 3 reinforcement groups:
