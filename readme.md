@@ -10,6 +10,19 @@ Internally it uses ZEN fast rope and para drop scripts. _WARNING Para drop is no
 - [ZEN](https://github.com/zen-mod/ZEN)
 - [MC framework](https://www.misfit-company.com/arma3/mission_making/framework/) (for Murk) >=v0.3.4
 
+# Download and installation
+
+You can download the latest stable release [here](https://github.com/Timber-Corp-PMC/arma-reinforcements/releases/latest).
+
+Copy the `reinforcements` folder inside your mission folder.
+
+Load the script functions by adding this to your `description.ext`
+```ext
+class CfgFunctions {
+    #include "reinforcements\CfgFunctions.hpp"
+};
+```
+
 # Usage
 
 For this example we will add 3 reinforcement groups.
